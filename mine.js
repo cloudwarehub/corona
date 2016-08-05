@@ -3,6 +3,24 @@ var uuid = require('node-uuid');
 var fs=require('fs');
 var cmd=require('node-cmd');
 var namespace='C:/Users/';
+var net = require('net');
+
+
+//监听端口号named pipe
+var server = net.createServer(function(stream) {
+  stream.on('data', function(c) {
+    console.log('portal:', c.toString());
+  });
+  stream.on('end', function() {
+    server.close();
+  });
+});
+//监听端口号
+server.listen(namespace+'/tmp/port.sock');
+
+
+
+
 var socket = require('socket.io-client')('http://localhost:81');
 
 
@@ -18,12 +36,14 @@ function  str(username){
         function(ans){
             console.log('the new user is : ',username);
 			console.log('the cmd ans id ',ans);
-			//写命令参数
-			fs.writeFile(namespace+username, data, function (err) {
-			if (err) throw err;
-			});
+			//登录进入之后应该写哪些内容呢?监听管道,写管道
+			//写命令参数,pipe
+			var stream = net.connect(namespace+'/tmp/cmd.sock');
+			stream.write(data);
+			stream.end();
+
 			//再读取端口号即可
-			var reader=new createLineReader(namespace+username+'/1.txt',socket);
+			//var reader=new createLineReader(namespace+username+'/1.txt',socket);
         }
      );
 	 //先写再读

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "named-pipes": "0.0.1",
     "restify": "^4.1.1"
   },
   "devDependencies": {},
