@@ -4,8 +4,12 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "actioncable": "^5.0.0",
     "named-pipes": "0.0.1",
-    "restify": "^4.1.1"
+    "node-cmd": "^1.1.1",
+    "restify": "^4.1.1",
+    "socket.io-client": "^1.4.8",
+    "uuid": "^2.0.2"
   },
   "devDependencies": {},
   "scripts": {
