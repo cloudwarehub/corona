@@ -4,31 +4,11 @@ var fs = require('fs');
 var uuid = require('uuid');
 var shortid = require('shortid');
 
-var restify = require('restify');
-
 
 var sessions = [];
 
-function respond(req, res, next) {
-  for (var i in sessions) {
-    if (sessions[i].sysname == req.params.ssid) {
-      res.send(sessions[i].cmd);
-      sessions.splice(i, 1);
-      break;
-    }
-  }
-  next();
-}
-
-var server = restify.createServer();
-server.get('/session/:sessid', respond);
-
-server.listen(8080, function() {
-  console.log('%s listening at %s', server.name, server.url);
-});
-
 function run(sess) {
-  cmd.get('c:/corona/run.bat ' + sess.id);
+  cmd.get('c:/corona/cmd.bat ' + sess.id);
 }
 
 /* 参数获取 */
@@ -96,37 +76,39 @@ function sendHostInfo() {
 }
 
 
-// function check(session) {
-//   var portfile = 'c:/users/' + session.id + '/pulsar-port.txt';
-//   try {
-//     fs.accessSync(portfile);
-//     session.port = fs.readFileSync(portfile, 'utf8');
-//     socket.emit('runsuccess', {port: session.port, session: session.id, token: session.token});
-//     if (session.port)
-//       clearTimeout(session.checkTimeout);
-//   } catch (e) {
-//     // continue wait
-//     session.checkTimeout = setTimeout(function(){check(session)}, 400);
-//   }
-// }
-//
-// function getPulsarPort(session) {
-//   session.checkTimeout = setTimeout(function(){check(session)}, 400);
-// }
+function check(session) {
+  var portfile = 'c:/users/' + session.id + '/pulsar-port.txt';
+  try {
+    fs.accessSync(portfile);
+    session.port = fs.readFileSync(portfile, 'utf8');
+    socket.emit('runsuccess', {port: session.port, session: session.id, token: session.token});
+    if (session.port)
+      clearTimeout(session.checkTimeout);
+  } catch (e) {
+    // continue wait
+    session.checkTimeout = setTimeout(function(){check(session)}, 400);
+  }
+}
+
+function getPulsarPort(session) {
+  session.checkTimeout = setTimeout(function(){check(session)}, 400);
+}
 
 socket.on('run', function(msg) {
   console.log('run', msg);
 
   /* create session */
   var sess = {
-    sysname: msg.sysname,
-    cmd: msg.cmd
+    id: shortid.generate(),
+    cmd: msg.cmd,
+    token: msg.token
   };
   sessions.push(sess);
 
   /* get pulsar port */
-  //getPulsarPort(sess);
+  getPulsarPort(sess);
 
   /* run cloudware */
   run(sess);
+
 });
